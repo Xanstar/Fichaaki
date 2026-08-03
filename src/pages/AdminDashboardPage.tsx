@@ -30,39 +30,12 @@ function isoDate(date: Date) {
     timeZone: "America/Argentina/Buenos_Aires",
   }).format(date);
 }
-function estadoLabel(estado: string) {
-  if (estado === "trabajando") return "En curso";
-  if (estado === "finalizada") return "Finalizada";
-  return "Pendiente";
-}
 
-function estadoClase(estado: string) {
-  if (estado === "trabajando")
-    return "bg-success-soft text-success";
 
-  if (estado === "finalizada")
-    return "bg-brand-soft text-brand";
 
-  return "bg-surface-muted text-ink-soft";
-}
 
-function formatDuration(hours: number | null) {
-  if (hours == null) return "—";
 
-  if (hours < 1) return `${Math.round(hours * 60)} min`;
 
-  return `${hours.toFixed(1)} h`;
-}
-
-function googleMapsUrl(location: string | null | undefined) {
-  const coordinates = location?.match(
-    /Lat\s+(-?\d+(?:\.\d+)?)\s+·\s+Lon\s+(-?\d+(?:\.\d+)?)/
-  );
-
-  if (!coordinates) return null;
-
-  return `https://www.google.com/maps/search/?api=1&query=${coordinates[1]},${coordinates[2]}`;
-}
 
 export function AdminDashboardPage() {
   const { logout } = useAuth();
