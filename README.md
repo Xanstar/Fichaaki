@@ -1,32 +1,147 @@
-# React + TypeScript + Vite
+# FichAKI
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Sistema de control horario desarrollado con React, Vite y Supabase.
 
-Currently, two official plugins are available:
+Permite que los empleados registren su entrada y salida mediante geolocalización y que los administradores controlen toda la asistencia desde un panel.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+# Tecnologías utilizadas
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- Supabase
+- Supabase Edge Functions
+- React Router
+- Framer Motion
 
-## Expanding the Oxlint configuration
+---
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+# Funcionalidades
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+## Empleados
+
+- Iniciar sesión
+- Registrar entrada
+- Registrar salida
+- Geolocalización automática
+- Visualización del estado de la jornada
+- Control de horario laboral
+
+## Administrador
+
+- Inicio de sesión
+- Panel de control
+- Ver fichadas del día
+- Ver historial semanal
+- Ver historial mensual
+- Crear empleados
+- Editar empleados
+- Modificar credenciales
+- Modificar jornada laboral
+- Visualizar ubicación de entrada y salida mediante Google Maps
+
+---
+
+# Instalación
+
+## 1. Clonar el proyecto
+
+```bash
+git clone https://github.com/LautaroGonzalez1010/FichAKI.git
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## 2. Entrar al proyecto
+
+```bash
+cd FichAKI
+```
+
+## 3. Instalar dependencias
+
+```bash
+npm install
+```
+
+## 4. Crear el archivo `.env`
+
+Agregar las siguientes variables:
+
+```env
+VITE_SUPABASE_URL=TU_URL_SUPABASE
+VITE_SUPABASE_ANON_KEY=TU_ANON_KEY
+```
+
+## 5. Ejecutar el proyecto
+
+```bash
+npm run dev
+```
+
+---
+
+# Build
+
+Para generar la versión de producción:
+
+```bash
+npm run build
+```
+
+---
+
+# Deploy en Vercel
+
+1. Subir el proyecto a GitHub.
+2. Importar el repositorio en Vercel.
+3. Agregar las variables de entorno:
+
+```
+VITE_SUPABASE_URL
+VITE_SUPABASE_ANON_KEY
+```
+
+4. Deploy.
+
+---
+
+# Estructura del proyecto
+
+```
+src/
+ ├── components/
+ ├── pages/
+ ├── services/
+ ├── hooks/
+ ├── context/
+ ├── assets/
+
+supabase/
+ ├── functions/
+```
+
+---
+
+# Variables de entorno
+
+```
+VITE_SUPABASE_URL
+VITE_SUPABASE_ANON_KEY
+```
+
+---
+
+# Autor
+
+Desarrollado por **Lautaro Gonzalez**.
+
+GitHub:
+https://github.com/LautaroGonzalez1010
+
+---
+
+# Licencia
+
+Proyecto desarrollado con fines educativos y comerciales.
