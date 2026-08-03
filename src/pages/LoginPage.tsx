@@ -69,13 +69,11 @@ export function LoginPage() {
             </Button>
           </form>
 
-          <button className="mt-5 w-full text-center text-sm font-medium text-brand hover:text-brand-dark">
-            ¿Olvidaste tu contraseña?
-          </button>
+        
         </div>
 
         <p className="mt-6 text-center text-xs text-ink-soft">
-          Demo con datos simulados — cualquier email y contraseña de 4+ caracteres funciona.
+          FichAKI - 2026
         </p>
       </div>
     </div>
