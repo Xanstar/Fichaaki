@@ -5,6 +5,8 @@ import { LoginPage } from './pages/LoginPage'
 import { EmployeeDashboardPage } from './pages/EmployeeDashboardPage'
 import { AdminDashboardPage } from './pages/AdminDashboardPage'
 import { EmployeesPage } from "./pages/EmployeesPage";
+import { useEffect, useState } from "react";
+import { SplashScreen } from "./components/splash/SplashScreen";
 
 function PrivateRoute({ children }: { children: ReactElement }) {
   const { user, isLoading } = useAuth();
@@ -62,9 +64,23 @@ function AppRoutes() {
 }
 
 export default function App() {
+  const [showSplash, setShowSplash] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 1800);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (showSplash) {
+    return <SplashScreen />;
+  }
+
   return (
     <AuthProvider>
       <AppRoutes />
     </AuthProvider>
-  )
+  );
 }
