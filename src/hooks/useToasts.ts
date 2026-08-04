@@ -1,11 +1,12 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import type { ToastData, ToastType } from '../components/Toast'
 
 export function useToasts() {
   const [toasts, setToasts] = useState<ToastData[]>([])
+  const nextId = useRef(1)
 
   const push = useCallback((type: ToastType, message: string) => {
-    const id = Date.now()
+    const id = nextId.current++
     setToasts((prev) => [...prev, { id, type, message }])
   }, [])
 

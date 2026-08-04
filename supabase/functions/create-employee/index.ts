@@ -16,6 +16,74 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const authHeader = req.headers.get("Authorization");
+
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "No autorizado",
+        }),
+        {
+          status: 401,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+
+    const token = authHeader.replace("Bearer ", "");
+
+    const {
+      data: { user: caller },
+      error: callerError,
+    } = await supabase.auth.getUser(token);
+
+    if (callerError || !caller) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Usuario no autenticado",
+        }),
+        {
+          status: 401,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+
+    const { data: callerProfile } = await supabase
+      .from("profiles")
+      .select("rol")
+      .eq("id", caller.id)
+      .single();
+
+    if (callerProfile?.rol !== "admin") {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "No tenés permisos de administrador.",
+        }),
+        {
+          status: 403,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+
     const {
       nombre,
       apellido,
@@ -27,10 +95,21 @@ Deno.serve(async (req) => {
       jornada_fin,
     } = await req.json();
 
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
+    if (!nombre || !apellido || !email || !password || !cargo || !jornada_inicio || !jornada_fin) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Faltan campos obligatorios.",
+        }),
+        {
+          status: 400,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
 
     // Crear usuario en Authentication
     const { data: authData, error: authError } =
@@ -39,14 +118,6 @@ Deno.serve(async (req) => {
         password,
         email_confirm: true,
       });
-
-      console.log("========== CREATE USER ==========");
-console.log(authData);
-console.log(authError);
-console.log("USER:", authData?.user);
-console.log("USER ID:", authData?.user?.id);
-console.log("EMAIL:", authData?.user?.email);
-console.log("===============================");
 
     if (authError) {
       return new Response(
@@ -64,23 +135,21 @@ console.log("===============================");
       );
     }
 
-    console.log("INSERTANDO PROFILE CON ID:", authData.user.id);
-
-    // Crear perfil
-const { error: profileError } = await supabase
-  .from("profiles")
-  .update({
-    nombre,
-    apellido,
-    email,
-    rol: "employee",
-    cargo,
-    rubro,
-    jornada_inicio,
-    jornada_fin,
-    activo: true,
-  })
-  .eq("id", authData.user.id);
+    // El trigger handle_new_user ya creó el perfil; completamos sus datos
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .update({
+        nombre,
+        apellido,
+        email,
+        rol: "employee",
+        cargo,
+        rubro,
+        jornada_inicio,
+        jornada_fin,
+        activo: true,
+      })
+      .eq("id", authData.user.id);
 
     if (profileError) {
       // Si falla el perfil, eliminar el usuario

@@ -7,10 +7,37 @@ export interface AuthUser {
   email: string
   cargo: string
   rol: UserRole
-  companyId: string
 }
 
 export type AttendanceStatus = 'sin_registrar' | 'trabajando' | 'finalizada'
+
+export interface AttendanceRow {
+  id: string
+  employee_id: string
+  fecha: string
+  entrada_at: string | null
+  salida_at: string | null
+  entrada_lat: number | null
+  entrada_lng: number | null
+  salida_lat: number | null
+  salida_lng: number | null
+  estado: AttendanceStatus
+  horas_trabajadas: number | null
+  llegada_tarde: boolean
+  minutos_tarde: number
+}
+
+export interface EmployeeProfile {
+  id: string
+  nombre: string
+  apellido: string
+  email: string
+  cargo: string
+  rubro: string
+  jornada_inicio: string
+  jornada_fin: string
+}
+
 
 export interface AttendanceRecord {
   id: string

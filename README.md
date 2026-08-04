@@ -1,12 +1,12 @@
-# FichAKI
+# Fichaqui
 
-Sistema de control horario desarrollado con React, Vite y Supabase.
+Sistema de control horario para empresas. Desarrollado con React, Vite y Supabase.
 
 Permite que los empleados registren su entrada y salida mediante geolocalización y que los administradores controlen toda la asistencia desde un panel.
 
 ---
 
-# Tecnologías utilizadas
+## Tecnologías
 
 - React
 - TypeScript
@@ -19,72 +19,51 @@ Permite que los empleados registren su entrada y salida mediante geolocalizació
 
 ---
 
-# Funcionalidades
+## Funcionalidades
 
-## Empleados
+### Empleados
 
 - Iniciar sesión
-- Registrar entrada
-- Registrar salida
+- Registrar entrada y salida
 - Geolocalización automática
 - Visualización del estado de la jornada
-- Control de horario laboral
+- Historial de fichadas
 
-## Administrador
+### Administrador
 
-- Inicio de sesión
-- Panel de control
-- Ver fichadas del día
-- Ver historial semanal
-- Ver historial mensual
-- Crear empleados
-- Editar empleados
+- Panel de control con métricas del día
+- Fichadas del día, semana y mes
+- Crear y editar empleados
 - Modificar credenciales
-- Modificar jornada laboral
-- Visualizar ubicación de entrada y salida mediante Google Maps
+- Configurar jornada laboral
+- Ver ubicación de entrada y salida en Google Maps
 
 ---
 
-# Instalación
-
-## 1. Clonar el proyecto
+## Instalación
 
 ```bash
 git clone https://github.com/LautaroGonzalez1010/FichAKI.git
-```
-
-## 2. Entrar al proyecto
-
-```bash
 cd FichAKI
-```
-
-## 3. Instalar dependencias
-
-```bash
 npm install
 ```
 
-## 4. Crear el archivo `.env`
+### Variables de entorno
 
-Agregar las siguientes variables:
+Crear un archivo `.env` en la raíz:
 
-```env
+```
 VITE_SUPABASE_URL=TU_URL_SUPABASE
 VITE_SUPABASE_ANON_KEY=TU_ANON_KEY
 ```
 
-## 5. Ejecutar el proyecto
+### Ejecutar
 
 ```bash
 npm run dev
 ```
 
----
-
-# Build
-
-Para generar la versión de producción:
+### Build de producción
 
 ```bash
 npm run build
@@ -92,56 +71,42 @@ npm run build
 
 ---
 
-# Deploy en Vercel
+## Supabase
 
-1. Subir el proyecto a GitHub.
-2. Importar el repositorio en Vercel.
-3. Agregar las variables de entorno:
+### Base de datos
 
+Aplicar la migración inicial (`supabase/migrations/0001_init.sql`):
+
+```bash
+supabase db push
 ```
-VITE_SUPABASE_URL
-VITE_SUPABASE_ANON_KEY
+
+O copiar el contenido de `supabase/migrations/0001_init.sql` en Supabase Studio > SQL Editor y ejecutarlo.
+
+### Edge Functions
+
+```bash
+supabase functions deploy check-in check-out create-employee update-employee
 ```
 
-4. Deploy.
+> Importante: las funciones `create-employee` y `update-employee` solo aceptan llamadas de un usuario con rol `admin`. Todas las funciones tienen `verify_jwt = true`.
+
+### RLS y seguridad
+
+- Los empleados solo leen sus propios datos.
+- Los administradores acceden a todo.
+- El registro público de usuarios está desactivado; los empleados se crean desde el panel de administración.
 
 ---
 
-# Estructura del proyecto
-
-```
-src/
- ├── components/
- ├── pages/
- ├── services/
- ├── hooks/
- ├── context/
- ├── assets/
-
-supabase/
- ├── functions/
-```
-
----
-
-# Variables de entorno
-
-```
-VITE_SUPABASE_URL
-VITE_SUPABASE_ANON_KEY
-```
-
----
-
-# Autor
+## Autor
 
 Desarrollado por **Lautaro Gonzalez**.
 
-GitHub:
-https://github.com/LautaroGonzalez1010
+GitHub: https://github.com/LautaroGonzalez1010
 
 ---
 
-# Licencia
+## Licencia
 
 Proyecto desarrollado con fines educativos y comerciales.

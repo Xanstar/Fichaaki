@@ -67,8 +67,6 @@ Deno.serve(async (req) => {
   timeZone: "America/Argentina/Buenos_Aires",
 }).format(new Date());
 
-console.log("TODAY:", today);
-
 const { data: attendance, error: attendanceError } = await supabase
   .from("attendance_records")
   .select("*")
@@ -76,9 +74,6 @@ const { data: attendance, error: attendanceError } = await supabase
   .eq("fecha", today)
   .eq("estado", "trabajando")
   .single();
-
-console.log("ATTENDANCE:", attendance);
-console.log("ERROR:", attendanceError);
 
     if (attendanceError || !attendance) {
       return new Response(

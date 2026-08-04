@@ -114,8 +114,6 @@ Deno.serve(async (req) => {
 
 const now = new Date();
 
-console.log("NOW:", now.toISOString());
-
 const argentinaNow = new Intl.DateTimeFormat("es-AR", {
   timeZone: "America/Argentina/Buenos_Aires",
   hour: "2-digit",
@@ -142,16 +140,12 @@ const minutesLate = Math.max(
 
 const isLate = minutesLate > 0;
 
-console.log("INSERTANDO:", {
-  now: now.toISOString(),
-  today,
-  currentMinutes,
-});
 const { data: inserted, error } = await supabase
   .from("attendance_records")
   .insert({
     employee_id: user.id,
     fecha: today,
+    entrada_at: now.toISOString(),
     entrada_lat: lat,
     entrada_lng: lng,
     estado: "trabajando",

@@ -27,11 +27,46 @@ Deno.serve(async (req) => {
     const token = authHeader.replace("Bearer ", "");
 
     const {
-      data: { user },
+      data: { user: caller },
+      error: callerError,
     } = await supabase.auth.getUser(token);
 
-    if (!user) {
-      throw new Error("Usuario no autenticado");
+    if (callerError || !caller) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Usuario no autenticado",
+        }),
+        {
+          status: 401,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+
+    const { data: callerProfile } = await supabase
+      .from("profiles")
+      .select("rol")
+      .eq("id", caller.id)
+      .single();
+
+    if (callerProfile?.rol !== "admin") {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "No tenés permisos de administrador.",
+        }),
+        {
+          status: 403,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
     }
 
     const {
@@ -67,15 +102,15 @@ Deno.serve(async (req) => {
 
     const { error: profileError } = await supabase
       .from("profiles")
-   .update({
-  nombre,
-  apellido,
-  email,
-  rubro,
-  cargo,
-  jornada_inicio,
-  jornada_fin,
-})
+      .update({
+        nombre,
+        apellido,
+        email,
+        rubro,
+        cargo,
+        jornada_inicio,
+        jornada_fin,
+      })
       .eq("id", id);
 
     if (profileError) throw profileError;

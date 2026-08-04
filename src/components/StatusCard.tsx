@@ -84,7 +84,7 @@ export function StatusCard({ estado, entrada, salida, entradaTimestamp, salidaTi
       <div className="border-t border-border-subtle pt-4">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-ink">Registro de hoy</h2>
-          <span className="text-xs text-ink-soft">Datos personales</span>
+          <span className="text-xs text-ink-soft">Entrada y salida</span>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           <LocationDetail label="Entrada" time={entrada} timestamp={entradaTimestamp} location={ubicacionEntrada} />

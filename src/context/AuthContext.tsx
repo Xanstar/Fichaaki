@@ -12,8 +12,23 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
-function toAuthUser(profile: { id: string; nombre: string; apellido: string; email: string; rol: 'admin' | 'employee'; rubro: string }): AuthUser {
-  return { id: profile.id, nombre: profile.nombre, apellido: profile.apellido, email: profile.email, cargo: profile.rubro, rol: profile.rol, companyId: 'default' }
+function toAuthUser(profile: {
+  id: string
+  nombre: string
+  apellido: string
+  email: string
+  rol: 'admin' | 'employee'
+  cargo: string
+  rubro: string
+}): AuthUser {
+  return {
+    id: profile.id,
+    nombre: profile.nombre,
+    apellido: profile.apellido,
+    email: profile.email,
+    cargo: profile.cargo || profile.rubro,
+    rol: profile.rol,
+  }
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -24,7 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function loadProfile(userId: string) {
     const { data, error: profileError } = await supabase
       .from('profiles')
-      .select('id, nombre, apellido, email, rol, rubro')
+      .select('id, nombre, apellido, email, rol, cargo, rubro')
       .eq('id', userId)
       .single()
     if (profileError || !data) throw new Error('No se encontró el perfil de usuario.')

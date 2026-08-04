@@ -73,7 +73,7 @@ export function LoginPage() {
         </div>
 
         <p className="mt-6 text-center text-xs text-ink-soft">
-          FichAKI - 2026
+          Fichaqui - 2026
         </p>
       </div>
     </div>
