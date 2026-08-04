@@ -79,6 +79,9 @@ Deno.serve(async (req) => {
       rubro,
       jornada_inicio,
       jornada_fin,
+      sucursal_id,
+      turno_id,
+      pin,
     } = await req.json();
 
     const authUpdate: {
@@ -110,6 +113,9 @@ Deno.serve(async (req) => {
         cargo,
         jornada_inicio,
         jornada_fin,
+        sucursal_id: sucursal_id ?? null,
+        turno_id: turno_id ?? null,
+        pin: pin || null,
       })
       .eq("id", id);
 

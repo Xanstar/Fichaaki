@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AlertTriangle, Clock3, ShieldCheck, UserX, Users } from 'lucide-react'
+import { AlertTriangle, CalendarDays, Clock3, Download, MapPin, ShieldCheck, UserX, Users } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { Logo } from '../components/Logo'
 import {
@@ -9,6 +9,10 @@ import {
 } from '../services/adminService'
 import { supabase } from '../services/supabase'
 import { AttendanceCard } from '../components/admin/AttendanceCard'
+import { NovedadesPanel } from '../components/admin/NovedadesPanel'
+import { useToasts } from '../hooks/useToasts'
+import { ToastContainer } from '../components/Toast'
+import { buildAttendanceCsv, downloadCsv } from '../services/reportes'
 import { formatTime, todayISO, toISO } from '../utils/date'
 import type { AttendanceRow, AttendanceStatus } from '../types'
 
@@ -43,6 +47,8 @@ interface ViewRecord {
   salidaLng: number | null
   entradaDireccion: string | null
   salidaDireccion: string | null
+  horasExtra: number | null
+  observacion: string | null
 }
 
 const periodos: { id: Periodo; label: string }[] = [
@@ -97,12 +103,15 @@ function toViewRecord(
     salidaLng: record?.salida_lng ?? null,
     entradaDireccion: record?.entrada_direccion ?? null,
     salidaDireccion: record?.salida_direccion ?? null,
+    horasExtra: record?.horas_extra ?? null,
+    observacion: record?.observacion ?? null,
   }
 }
 
 export function AdminDashboardPage() {
   const { logout } = useAuth()
   const navigate = useNavigate()
+  const { toasts, push, dismiss } = useToasts()
 
   const [periodo, setPeriodo] = useState<Periodo>('dia')
   const [weekDay, setWeekDay] = useState('')
@@ -218,6 +227,13 @@ export function AdminDashboardPage() {
     navigate('/login')
   }
 
+  function handleExport() {
+    const csv = buildAttendanceCsv(rows)
+    const fechaLabel = selectedDate.replace(/-/g, '')
+    downloadCsv(`fichaqui-reporte-${fechaLabel}.csv`, csv)
+    push('success', 'Reporte CSV descargado.')
+  }
+
   const metricCards = [
     { label: 'Personas', value: metrics.empleados, Icon: Users, color: 'text-brand' },
     { label: 'En curso', value: metrics.enCurso, Icon: Clock3, color: 'text-success' },
@@ -235,12 +251,35 @@ export function AdminDashboardPage() {
               Administración
             </span>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex flex-wrap items-center justify-end gap-1">
+            <NovedadesPanel onNew={(mensaje) => push('info', mensaje)} />
             <button
               onClick={() => navigate('/admin/empleados')}
-              className="rounded-xl bg-brand px-4 py-2 font-semibold text-white transition hover:opacity-90"
+              className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-semibold text-ink transition hover:bg-surface-muted"
             >
+              <Users size={16} />
               Empleados
+            </button>
+            <button
+              onClick={() => navigate('/admin/sucursales')}
+              className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-semibold text-ink transition hover:bg-surface-muted"
+            >
+              <MapPin size={16} />
+              Sucursales
+            </button>
+            <button
+              onClick={() => navigate('/admin/turnos')}
+              className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-semibold text-ink transition hover:bg-surface-muted"
+            >
+              <Clock3 size={16} />
+              Turnos
+            </button>
+            <button
+              onClick={() => navigate('/admin/licencias')}
+              className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-semibold text-ink transition hover:bg-surface-muted"
+            >
+              <CalendarDays size={16} />
+              Licencias
             </button>
             <button
               onClick={handleLogout}
@@ -253,6 +292,7 @@ export function AdminDashboardPage() {
       </header>
 
       <main className="mx-auto max-w-6xl px-4 pt-5 sm:px-5 sm:pt-8">
+        <ToastContainer toasts={toasts} onClose={dismiss} />
         <section className="flex flex-wrap items-center justify-between gap-4 rounded-[28px] border border-border-subtle bg-gradient-to-br from-brand-soft via-surface to-surface-muted p-5 shadow-sm shadow-ink/[0.03] sm:p-7">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full bg-surface px-3 py-1 text-sm font-medium text-brand">
@@ -289,7 +329,16 @@ export function AdminDashboardPage() {
 
         <section className="mt-6 rounded-[28px] border border-border-subtle bg-surface p-4 shadow-sm shadow-ink/[0.03] sm:mt-8 sm:p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-lg font-semibold text-ink">{titulo}</h2>
+            <div className="flex items-center gap-3">
+              <h2 className="text-lg font-semibold text-ink">{titulo}</h2>
+              <button
+                onClick={handleExport}
+                className="flex items-center gap-1.5 rounded-xl bg-success-soft px-3 py-2 text-sm font-semibold text-success transition hover:bg-success hover:text-white"
+              >
+                <Download size={16} />
+                Exportar CSV
+              </button>
+            </div>
             <div className="flex w-full rounded-xl bg-surface-muted p-1 sm:w-auto">
               {periodos.map((item) => (
                 <button

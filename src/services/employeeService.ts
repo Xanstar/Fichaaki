@@ -22,6 +22,9 @@ export async function createEmployee(data: {
   rubro: string
   jornada_inicio: string
   jornada_fin: string
+  sucursal_id?: string | null
+  turno_id?: string | null
+  pin?: string | null
 }) {
   return invokeEdgeFunction('create-employee', data)
 }
@@ -36,6 +39,9 @@ export async function updateEmployee(data: {
   rubro: string
   jornada_inicio: string
   jornada_fin: string
+  sucursal_id?: string | null
+  turno_id?: string | null
+  pin?: string | null
 }) {
   return invokeEdgeFunction('update-employee', data)
 }

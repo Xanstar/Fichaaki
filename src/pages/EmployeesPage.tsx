@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Pencil, Plus, Users } from 'lucide-react'
+import { ArrowLeft, MapPin, Pencil, Plus, Users } from 'lucide-react'
 import { EmployeeModal } from '../components/EmployeeModal'
 import { getEmployees } from '../services/employeeService'
+import { getSucursales } from '../services/sucursalesService'
+import { getTurnos } from '../services/turnosService'
 import { ToastContainer } from '../components/Toast'
 import { useToasts } from '../hooks/useToasts'
+import type { Sucursal, Turno } from '../types'
 
 interface Employee {
   id: string
@@ -15,6 +18,9 @@ interface Employee {
   cargo: string
   jornada_inicio: string
   jornada_fin: string
+  sucursal_id?: string | null
+  turno_id?: string | null
+  pin?: string | null
 }
 
 export function EmployeesPage() {
@@ -25,6 +31,8 @@ export function EmployeesPage() {
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [employees, setEmployees] = useState<Employee[]>([])
+  const [sucursales, setSucursales] = useState<Sucursal[]>([])
+  const [turnos, setTurnos] = useState<Turno[]>([])
 
   async function loadEmployees() {
     try {
@@ -34,9 +42,28 @@ export function EmployeesPage() {
     }
   }
 
+  async function loadConfig() {
+    try {
+      const [sucursalList, turnoList] = await Promise.all([getSucursales(), getTurnos()])
+      setSucursales(sucursalList)
+      setTurnos(turnoList)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   useEffect(() => {
     loadEmployees()
+    loadConfig()
   }, [])
+
+  function sucursalNombre(id?: string | null) {
+    return sucursales.find((sucursal) => sucursal.id === id)?.nombre
+  }
+
+  function turnoNombre(id?: string | null) {
+    return turnos.find((turno) => turno.id === id)?.nombre
+  }
 
   function openCreate() {
     setSelectedEmployee(null)
@@ -117,9 +144,27 @@ export function EmployeesPage() {
                       {employee.cargo || employee.rubro || 'Sin cargo'}
                     </p>
 
-                    <p className="mt-1 text-sm text-ink-soft">
-                      {employee.jornada_inicio} - {employee.jornada_fin}
-                    </p>
+                    <div className="mt-1 flex flex-wrap gap-2 text-xs text-ink-soft">
+                      <span className="rounded-full bg-surface-muted px-2 py-1">
+                        {employee.jornada_inicio} - {employee.jornada_fin}
+                      </span>
+                      {employee.turno_id && (
+                        <span className="rounded-full bg-brand-soft px-2 py-1 font-medium text-brand">
+                          Turno: {turnoNombre(employee.turno_id)}
+                        </span>
+                      )}
+                      {employee.sucursal_id && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-surface-muted px-2 py-1">
+                          <MapPin size={12} />
+                          {sucursalNombre(employee.sucursal_id)}
+                        </span>
+                      )}
+                      {employee.pin && (
+                        <span className="rounded-full bg-surface-muted px-2 py-1">
+                          PIN: {employee.pin}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <button
@@ -142,6 +187,8 @@ export function EmployeesPage() {
         open={openModal}
         mode={modalMode}
         employee={selectedEmployee}
+        sucursales={sucursales}
+        turnos={turnos}
         onSuccess={(message) => {
           push('success', message)
           setOpenModal(false)

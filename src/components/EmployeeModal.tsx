@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { createEmployee, updateEmployee } from '../services/employeeService'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Briefcase, Clock3, User, X } from 'lucide-react'
+import { Briefcase, Clock3, KeyRound, MapPin, User, X } from 'lucide-react'
+import type { Sucursal, Turno } from '../types'
 
 interface EmployeeForm {
   id: string
@@ -12,6 +13,9 @@ interface EmployeeForm {
   cargo: string
   jornada_inicio: string
   jornada_fin: string
+  sucursal_id?: string | null
+  turno_id?: string | null
+  pin?: string | null
 }
 
 type Props = {
@@ -19,6 +23,8 @@ type Props = {
   onClose: () => void
   mode?: 'create' | 'edit'
   employee?: EmployeeForm | null
+  sucursales?: Sucursal[]
+  turnos?: Turno[]
   onSuccess?: (message: string) => void
   onError?: (message: string) => void
 }
@@ -31,6 +37,8 @@ export function EmployeeModal({
   onClose,
   mode = 'create',
   employee,
+  sucursales = [],
+  turnos = [],
   onSuccess,
   onError,
 }: Props) {
@@ -42,6 +50,9 @@ export function EmployeeModal({
   const [cargo, setCargo] = useState('')
   const [jornadaInicio, setJornadaInicio] = useState('')
   const [jornadaFin, setJornadaFin] = useState('')
+  const [sucursalId, setSucursalId] = useState('')
+  const [turnoId, setTurnoId] = useState('')
+  const [pin, setPin] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -54,10 +65,22 @@ export function EmployeeModal({
       setCargo(employee?.cargo ?? '')
       setJornadaInicio(employee?.jornada_inicio ?? '')
       setJornadaFin(employee?.jornada_fin ?? '')
+      setSucursalId(employee?.sucursal_id ?? '')
+      setTurnoId(employee?.turno_id ?? '')
+      setPin(employee?.pin ?? '')
       setPassword('')
       setError('')
     }
   }, [employee, mode, open])
+
+  function handleTurnoChange(value: string) {
+    setTurnoId(value)
+    const turno = turnos.find((item) => item.id === value)
+    if (turno) {
+      setJornadaInicio(turno.jornada_inicio)
+      setJornadaFin(turno.jornada_fin)
+    }
+  }
 
   async function handleSaveEmployee() {
     if (!nombre || !apellido || !email || !cargo || !jornadaInicio || !jornadaFin) {
@@ -68,6 +91,16 @@ export function EmployeeModal({
     try {
       setLoading(true)
       setError('')
+
+      const common = {
+        cargo,
+        rubro,
+        jornada_inicio: jornadaInicio,
+        jornada_fin: jornadaFin,
+        sucursal_id: sucursalId || null,
+        turno_id: turnoId || null,
+        pin: pin || null,
+      }
 
       if (mode === 'create') {
         if (!password) {
@@ -80,10 +113,7 @@ export function EmployeeModal({
           apellido,
           email,
           password,
-          cargo,
-          rubro,
-          jornada_inicio: jornadaInicio,
-          jornada_fin: jornadaFin,
+          ...common,
         })
 
         onSuccess?.('Empleado creado correctamente.')
@@ -94,10 +124,7 @@ export function EmployeeModal({
           apellido,
           email,
           password: password || undefined,
-          cargo,
-          rubro,
-          jornada_inicio: jornadaInicio,
-          jornada_fin: jornadaFin,
+          ...common,
         })
 
         onSuccess?.('Empleado actualizado correctamente.')
@@ -216,6 +243,51 @@ export function EmployeeModal({
 
               <section>
                 <div className="mb-4 flex items-center gap-2">
+                  <MapPin className="h-5 w-5 text-brand" />
+                  <h3 className="font-semibold text-ink">Sucursal y turno</h3>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-ink">
+                      Sucursal
+                    </label>
+                    <select
+                      value={sucursalId}
+                      onChange={(e) => setSucursalId(e.target.value)}
+                      className={inputClasses}
+                    >
+                      <option value="">Sin sucursal asignada</option>
+                      {sucursales.map((sucursal) => (
+                        <option key={sucursal.id} value={sucursal.id}>
+                          {sucursal.nombre}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-ink">
+                      Turno
+                    </label>
+                    <select
+                      value={turnoId}
+                      onChange={(e) => handleTurnoChange(e.target.value)}
+                      className={inputClasses}
+                    >
+                      <option value="">Turno personalizado</option>
+                      {turnos.map((turno) => (
+                        <option key={turno.id} value={turno.id}>
+                          {turno.nombre} ({turno.jornada_inicio} - {turno.jornada_fin})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </section>
+
+              <section>
+                <div className="mb-4 flex items-center gap-2">
                   <Clock3 className="h-5 w-5 text-brand" />
                   <h3 className="font-semibold text-ink">Jornada laboral</h3>
                 </div>
@@ -240,6 +312,24 @@ export function EmployeeModal({
                       className={inputClasses}
                     />
                   </div>
+                </div>
+
+                <div className="mt-4">
+                  <label className="mb-2 flex items-center gap-2 text-sm font-medium text-ink">
+                    <KeyRound className="h-4 w-4 text-brand" />
+                    PIN de fichaje (opcional)
+                  </label>
+                  <input
+                    value={pin}
+                    onChange={(e) => setPin(e.target.value.replace(/[^0-9]/g, ''))}
+                    placeholder="Ej: 1234"
+                    maxLength={8}
+                    className={inputClasses}
+                  />
+                  <p className="mt-2 text-xs text-ink-soft">
+                    Si asignás un PIN, el empleado podrá fichar con el código de la
+                    sucursal + PIN en vez de GPS.
+                  </p>
                 </div>
               </section>
             </div>

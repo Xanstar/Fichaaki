@@ -17,6 +17,8 @@ interface AttendanceCardRecord {
   salidaLng?: number | null
   entradaDireccion?: string | null
   salidaDireccion?: string | null
+  horasExtra?: number | null
+  observacion?: string | null
 }
 
 function estadoLabel(estado: string) {
@@ -114,6 +116,20 @@ export function AttendanceCard({ record }: { record: AttendanceCardRecord }) {
             Llegó tarde
           </span>
         </div>
+      )}
+
+      {record.horasExtra != null && record.horasExtra > 0 && (
+        <div className="mt-2">
+          <span className="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-sm font-medium text-amber-600">
+            +{record.horasExtra} h extra
+          </span>
+        </div>
+      )}
+
+      {record.observacion && (
+        <p className="mt-2 rounded-xl bg-surface-muted px-3 py-2 text-xs text-ink">
+          <span className="font-semibold text-ink">Observación:</span> {record.observacion}
+        </p>
       )}
 
       <div className="mt-4 grid grid-cols-2 gap-3">

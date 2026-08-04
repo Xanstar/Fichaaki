@@ -5,6 +5,10 @@ import { LoginPage } from './pages/LoginPage'
 import { EmployeeDashboardPage } from './pages/EmployeeDashboardPage'
 import { AdminDashboardPage } from './pages/AdminDashboardPage'
 import { EmployeesPage } from './pages/EmployeesPage'
+import { SucursalesPage } from './pages/SucursalesPage'
+import { TurnosPage } from './pages/TurnosPage'
+import { LicenciasAdminPage } from './pages/LicenciasAdminPage'
+import { LicenciasEmpleadoPage } from './pages/LicenciasEmpleadoPage'
 import { useEffect, useState } from 'react'
 import { SplashScreen } from './components/splash/SplashScreen'
 import type { UserRole } from './types'
@@ -46,6 +50,15 @@ function AppRoutes() {
       />
 
       <Route
+        path="/empleado/licencias"
+        element={
+          <PrivateRoute role="employee">
+            <LicenciasEmpleadoPage />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
         path="/admin"
         element={
           <PrivateRoute role="admin">
@@ -59,6 +72,33 @@ function AppRoutes() {
         element={
           <PrivateRoute role="admin">
             <EmployeesPage />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/admin/sucursales"
+        element={
+          <PrivateRoute role="admin">
+            <SucursalesPage />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/admin/turnos"
+        element={
+          <PrivateRoute role="admin">
+            <TurnosPage />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/admin/licencias"
+        element={
+          <PrivateRoute role="admin">
+            <LicenciasAdminPage />
           </PrivateRoute>
         }
       />

@@ -93,6 +93,9 @@ Deno.serve(async (req) => {
       rubro,
       jornada_inicio,
       jornada_fin,
+      sucursal_id,
+      turno_id,
+      pin,
     } = await req.json();
 
     if (!nombre || !apellido || !email || !password || !cargo || !jornada_inicio || !jornada_fin) {
@@ -147,6 +150,9 @@ Deno.serve(async (req) => {
         rubro,
         jornada_inicio,
         jornada_fin,
+        sucursal_id: sucursal_id ?? null,
+        turno_id: turno_id ?? null,
+        pin: pin || null,
         activo: true,
       })
       .eq("id", authData.user.id);

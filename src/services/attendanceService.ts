@@ -30,12 +30,21 @@ export async function getAttendanceHistory(employeeId: string) {
   return data
 }
 
-export async function checkIn(data: { lat: number; lng: number; direccion?: string }) {
+export interface CheckInPayload {
+  lat?: number
+  lng?: number
+  direccion?: string
+  observacion?: string
+  codigoSucursal?: string
+  pin?: string
+}
+
+export async function checkIn(data: CheckInPayload) {
   const result = await invokeEdgeFunction('check-in', data)
   return result.attendance
 }
 
-export async function checkOut(data: { lat: number; lng: number; direccion?: string }) {
+export async function checkOut(data: CheckInPayload) {
   const result = await invokeEdgeFunction('check-out', data)
   return result.attendance
 }

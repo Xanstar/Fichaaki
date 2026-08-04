@@ -3,7 +3,7 @@ import { supabase } from './supabase'
 
 export async function invokeEdgeFunction(
   name: string,
-  body: Record<string, unknown>
+  body: object
 ) {
   const { data, error } = await supabase.functions.invoke(name, { body })
 

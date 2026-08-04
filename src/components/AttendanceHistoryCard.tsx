@@ -55,6 +55,11 @@ export function AttendanceHistoryCard({ record }: { record: AttendanceRecord }) 
         >
           {badge.label}
         </span>
+        {record.horasExtra != null && record.horasExtra > 0 && (
+          <p className="mt-1 text-[11px] font-semibold text-amber-600">
+            +{record.horasExtra} h extra
+          </p>
+        )}
         {record.estadoFichaje && (
           <p
             className={`mt-2 text-[11px] font-semibold ${
@@ -84,6 +89,11 @@ export function AttendanceHistoryCard({ record }: { record: AttendanceRecord }) 
           <p className="text-[11px] text-ink-soft">{record.timestamp}</p>
         )}
         {record.ubicacion && <p className="text-[11px] text-ink-soft">{record.ubicacion}</p>}
+        {record.observacion && (
+          <p className="mt-1 rounded-lg bg-surface-muted px-2 py-1 text-[11px] text-ink">
+            {record.observacion}
+          </p>
+        )}
       </div>
     </div>
   )

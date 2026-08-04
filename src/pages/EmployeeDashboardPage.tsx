@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { CalendarDays } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useClock } from '../hooks/useClock'
 import { useToasts } from '../hooks/useToasts'
 import { ToastContainer } from '../components/Toast'
 import { StatusCard } from '../components/StatusCard'
 import { AttendanceHistoryCard } from '../components/AttendanceHistoryCard'
+import { CheckInModal, type CheckInPayload } from '../components/CheckInModal'
 import { Logo } from '../components/Logo'
 import {
   getTodayAttendance,
@@ -29,6 +31,8 @@ function toAttendanceRecord(record: AttendanceRow): AttendanceRecord {
     entrada: formatTime(record.entrada_at),
     salida: formatTime(record.salida_at),
     horasTrabajadas: record.horas_trabajadas ?? null,
+    horasExtra: record.horas_extra ?? null,
+    observacion: record.observacion ?? null,
     estado: record.estado,
     entradaTimestamp: formatDateTime(record.entrada_at),
     salidaTimestamp: formatDateTime(record.salida_at),
@@ -37,6 +41,8 @@ function toAttendanceRecord(record: AttendanceRow): AttendanceRecord {
     estadoFichaje: record.llegada_tarde ? 'tarde' : 'a_tiempo',
   }
 }
+
+type PendingAction = 'entrada' | 'salida'
 
 export function EmployeeDashboardPage() {
   const { user, logout } = useAuth()
@@ -57,6 +63,8 @@ export function EmployeeDashboardPage() {
   const [history, setHistory] = useState<AttendanceRecord[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [justChecked, setJustChecked] = useState(false)
+  const [modalOpen, setModalOpen] = useState(false)
+  const [pendingAction, setPendingAction] = useState<PendingAction>('entrada')
 
   useEffect(() => {
     async function loadAttendance() {
@@ -95,57 +103,69 @@ export function EmployeeDashboardPage() {
     )
   }
 
-  async function handleCheckIn() {
-    if (!user) return
-
-    setIsSubmitting(true)
-
-    try {
-      const position = await getPosition()
-      const direccion = await reverseGeocode(
-        position.coords.latitude,
-        position.coords.longitude
-      )
-      const record = await checkIn({
-        lat: position.coords.latitude,
-        lng: position.coords.longitude,
-        direccion: direccion ?? undefined,
-      })
-
-      setToday(toAttendanceRecord(record))
-      flashCheck()
-      push('success', 'Entrada registrada correctamente.')
-    } catch (err) {
-      console.error(err)
-      push('error', err instanceof Error ? err.message : 'No se pudo registrar la entrada.')
-    } finally {
-      setIsSubmitting(false)
-    }
+  function handleCheckIn() {
+    setPendingAction('entrada')
+    setModalOpen(true)
   }
 
-  async function handleCheckOut() {
-    if (!user) return
+  function handleCheckOut() {
+    setPendingAction('salida')
+    setModalOpen(true)
+  }
 
+  async function handleConfirm(payload: CheckInPayload) {
     setIsSubmitting(true)
 
     try {
+      const common = { observacion: payload.observacion }
+
+      if (payload.useCode) {
+        const data = await (pendingAction === 'entrada'
+          ? checkIn({ ...common, codigoSucursal: payload.codigoSucursal, pin: payload.pin })
+          : checkOut({ ...common, codigoSucursal: payload.codigoSucursal, pin: payload.pin }))
+
+        setToday(toAttendanceRecord(data))
+        setModalOpen(false)
+        flashCheck()
+        push(
+          'success',
+          pendingAction === 'entrada'
+            ? 'Entrada registrada con el código de sucursal.'
+            : 'Salida registrada con el código de sucursal.'
+        )
+        return
+      }
+
       const position = await getPosition()
       const direccion = await reverseGeocode(
         position.coords.latitude,
         position.coords.longitude
       )
-      const record = await checkOut({
-        lat: position.coords.latitude,
-        lng: position.coords.longitude,
-        direccion: direccion ?? undefined,
-      })
 
-      setToday(toAttendanceRecord(record))
+      const data = await (pendingAction === 'entrada'
+        ? checkIn({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+            direccion: direccion ?? undefined,
+            ...common,
+          })
+        : checkOut({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+            direccion: direccion ?? undefined,
+            ...common,
+          }))
+
+      setToday(toAttendanceRecord(data))
+      setModalOpen(false)
       flashCheck()
-      push('success', 'Salida registrada correctamente.')
+      push('success', pendingAction === 'entrada' ? 'Entrada registrada correctamente.' : 'Salida registrada correctamente.')
     } catch (err) {
       console.error(err)
-      push('error', err instanceof Error ? err.message : 'No se pudo registrar la salida.')
+      push(
+        'error',
+        err instanceof Error ? err.message : 'No se pudo registrar la fichada.'
+      )
     } finally {
       setIsSubmitting(false)
     }
@@ -163,12 +183,21 @@ export function EmployeeDashboardPage() {
       <header className="border-b border-border-subtle bg-surface/90 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-4">
           <Logo />
-          <button
-            onClick={handleLogout}
-            className="text-sm font-medium text-ink-soft hover:text-ink"
-          >
-            Cerrar sesión
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate('/empleado/licencias')}
+              className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium text-ink-soft transition hover:bg-surface-muted hover:text-ink"
+            >
+              <CalendarDays size={16} />
+              Licencias
+            </button>
+            <button
+              onClick={handleLogout}
+              className="text-sm font-medium text-ink-soft hover:text-ink"
+            >
+              Cerrar sesión
+            </button>
+          </div>
         </div>
       </header>
 
@@ -226,6 +255,14 @@ export function EmployeeDashboardPage() {
           </div>
         </section>
       </main>
+
+      <CheckInModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        action={pendingAction}
+        loading={isSubmitting}
+        onConfirm={handleConfirm}
+      />
     </div>
   )
 }
