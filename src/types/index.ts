@@ -21,6 +21,8 @@ export interface AttendanceRow {
   entrada_lng: number | null
   salida_lat: number | null
   salida_lng: number | null
+  entrada_direccion: string | null
+  salida_direccion: string | null
   estado: AttendanceStatus
   horas_trabajadas: number | null
   llegada_tarde: boolean

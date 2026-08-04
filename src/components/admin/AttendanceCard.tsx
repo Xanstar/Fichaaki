@@ -15,6 +15,8 @@ interface AttendanceCardRecord {
   entradaLng?: number | null
   salidaLat?: number | null
   salidaLng?: number | null
+  entradaDireccion?: string | null
+  salidaDireccion?: string | null
 }
 
 function estadoLabel(estado: string) {
@@ -155,6 +157,23 @@ export function AttendanceCard({ record }: { record: AttendanceCardRecord }) {
           </button>
         )}
       </div>
+
+      {(record.entradaDireccion || record.salidaDireccion) && (
+        <div className="mt-3 flex flex-col gap-1 border-t border-border-subtle pt-3 text-xs text-ink-soft">
+          {record.entradaDireccion && (
+            <p className="break-words">
+              <span className="font-semibold text-ink">Entrada:</span>{' '}
+              {record.entradaDireccion}
+            </p>
+          )}
+          {record.salidaDireccion && (
+            <p className="break-words">
+              <span className="font-semibold text-ink">Salida:</span>{' '}
+              {record.salidaDireccion}
+            </p>
+          )}
+        </div>
+      )}
     </motion.article>
   )
 }

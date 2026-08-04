@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    const { lat, lng } = await req.json();
+    const { lat, lng, direccion } = await req.json();
 
     const today = new Intl.DateTimeFormat("en-CA", {
   timeZone: "America/Argentina/Buenos_Aires",
@@ -148,6 +148,7 @@ const { data: inserted, error } = await supabase
     entrada_at: now.toISOString(),
     entrada_lat: lat,
     entrada_lng: lng,
+    entrada_direccion: direccion ?? null,
     estado: "trabajando",
     llegada_tarde: isLate,
     minutos_tarde: minutesLate,

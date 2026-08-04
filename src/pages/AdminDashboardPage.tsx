@@ -41,6 +41,8 @@ interface ViewRecord {
   entradaLng: number | null
   salidaLat: number | null
   salidaLng: number | null
+  entradaDireccion: string | null
+  salidaDireccion: string | null
 }
 
 const periodos: { id: Periodo; label: string }[] = [
@@ -93,6 +95,8 @@ function toViewRecord(
     entradaLng: record?.entrada_lng ?? null,
     salidaLat: record?.salida_lat ?? null,
     salidaLng: record?.salida_lng ?? null,
+    entradaDireccion: record?.entrada_direccion ?? null,
+    salidaDireccion: record?.salida_direccion ?? null,
   }
 }
 

@@ -13,6 +13,7 @@ import {
   checkIn,
   checkOut,
 } from '../services/attendanceService'
+import { reverseGeocode } from '../services/geocode'
 import { formatDateTime, formatTime, todayISO } from '../utils/date'
 import type { AttendanceRecord, AttendanceRow, AttendanceStatus } from '../types'
 
@@ -31,8 +32,8 @@ function toAttendanceRecord(record: AttendanceRow): AttendanceRecord {
     estado: record.estado,
     entradaTimestamp: formatDateTime(record.entrada_at),
     salidaTimestamp: formatDateTime(record.salida_at),
-    ubicacionEntrada: locationLabel(record.entrada_lat, record.entrada_lng),
-    ubicacionSalida: locationLabel(record.salida_lat, record.salida_lng),
+    ubicacionEntrada: record.entrada_direccion ?? locationLabel(record.entrada_lat, record.entrada_lng),
+    ubicacionSalida: record.salida_direccion ?? locationLabel(record.salida_lat, record.salida_lng),
     estadoFichaje: record.llegada_tarde ? 'tarde' : 'a_tiempo',
   }
 }
@@ -101,9 +102,14 @@ export function EmployeeDashboardPage() {
 
     try {
       const position = await getPosition()
+      const direccion = await reverseGeocode(
+        position.coords.latitude,
+        position.coords.longitude
+      )
       const record = await checkIn({
         lat: position.coords.latitude,
         lng: position.coords.longitude,
+        direccion: direccion ?? undefined,
       })
 
       setToday(toAttendanceRecord(record))
@@ -124,9 +130,14 @@ export function EmployeeDashboardPage() {
 
     try {
       const position = await getPosition()
+      const direccion = await reverseGeocode(
+        position.coords.latitude,
+        position.coords.longitude
+      )
       const record = await checkOut({
         lat: position.coords.latitude,
         lng: position.coords.longitude,
+        direccion: direccion ?? undefined,
       })
 
       setToday(toAttendanceRecord(record))

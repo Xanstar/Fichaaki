@@ -67,8 +67,18 @@ export function AttendanceHistoryCard({ record }: { record: AttendanceRecord }) 
         {record.entradaTimestamp && (
           <p className="text-[11px] text-ink-soft">Entrada: {record.entradaTimestamp}</p>
         )}
+        {record.ubicacionEntrada && (
+          <p className="break-words text-[11px] font-medium text-ink">
+            Entrada en {record.ubicacionEntrada}
+          </p>
+        )}
         {record.salidaTimestamp && (
           <p className="text-[11px] text-ink-soft">Salida: {record.salidaTimestamp}</p>
+        )}
+        {record.ubicacionSalida && (
+          <p className="break-words text-[11px] font-medium text-ink">
+            Salida en {record.ubicacionSalida}
+          </p>
         )}
         {record.timestamp && !record.entradaTimestamp && !record.salidaTimestamp && (
           <p className="text-[11px] text-ink-soft">{record.timestamp}</p>
