@@ -99,14 +99,5 @@ supabase functions deploy check-in check-out create-employee update-employee
 
 ---
 
-## Autor
 
-Desarrollado por **Lautaro Gonzalez**.
 
-GitHub: https://github.com/LautaroGonzalez1010
-
----
-
-## Licencia
-
-Proyecto desarrollado con fines educativos y comerciales.
